@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.log
+
+
+# Virtualenv
+env/
+venv/
+
+# Django stuff
+*.db
+*.pot
+*.pyc
+*.pyo
+*.pyd
+*.migrations
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
+
+# Linux
+*~
+
+# PyCharm
+.idea/
+
+# Secret files
+*.env
+.env
+
