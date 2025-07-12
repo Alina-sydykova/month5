@@ -9,7 +9,7 @@ class Category(models.Model):
 
 class Product(models.Model):
     title = models.CharField(max_length=100)  
-    description = models.TextField()  
+    description = models.TextField(blank=True, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)  
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
     def __str__(self):
@@ -17,8 +17,10 @@ class Product(models.Model):
 
 
 class Review(models.Model):
-    text = models.TextField()  # Отзыв
+    text = models.TextField()  
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
+    stars = models.IntegerField(default=5)
+
     
 
     def __str__(self):
