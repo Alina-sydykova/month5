@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import auth_views 
 
 urlpatterns = [
     
@@ -16,7 +17,10 @@ urlpatterns = [
     path('reviews/<int:id>/', views.review_detail_update_delete_view),
 
 
-    path('auth/register/', views.register_view),
-    path('auth/confirm/', views.confirm_view),
+    path('register/', auth_views.register_view),
+    path('confirm/', auth_views.confirm_view),
 ]
+
+
+ 
 
