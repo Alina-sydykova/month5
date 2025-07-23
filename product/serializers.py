@@ -1,6 +1,46 @@
 from rest_framework import serializers
 from .models import Category, Product, Review
 
+from django.contrib.auth.models import User
+from .models import ConfirmationCode
+
+
+class RegisterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password']
+
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            username=validated_data['username'],
+            email=validated_data.get('email'),
+            password=validated_data['password'],
+            is_active=False
+        )
+        ConfirmationCode.objects.create(user=user)  
+        print(f"Confirmation code for {user.username}: {user.confirmationcode.code}")  
+        return user
+
+
+class ConfirmSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    code = serializers.CharField(max_length=6)
+
+    def validate(self, data):
+        try:
+            user = User.objects.get(username=data['username'])
+            confirm = ConfirmationCode.objects.get(user=user, code=data['code'])
+        except (User.DoesNotExist, ConfirmationCode.DoesNotExist):
+            raise serializers.ValidationError("Неверное имя пользователя или код")
+        return data
+
+    def save(self):
+        user = User.objects.get(username=self.validated_data['username'])
+        user.is_active = True
+        user.save()
+        ConfirmationCode.objects.filter(user=user).delete()
+
+
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:

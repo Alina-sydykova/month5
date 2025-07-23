@@ -6,8 +6,31 @@ from .serializers import (
     ReviewSerializer,
     ProductSerializer,
     ProductWithReviewsSerializer,
-    CategoryWithCountSerializer
+    CategoryWithCountSerializer,
+    RegisterSerializer, 
+    ConfirmSerializer
 )
+
+
+
+
+@api_view(['POST'])
+def register_view(request):
+    serializer = RegisterSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({"message": "Регистрация прошла успешно. Проверьте код."}, status=201)
+    return Response(serializer.errors, status=400)
+
+
+@api_view(['POST'])
+def confirm_view(request):
+    serializer = ConfirmSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({"message": "Пользователь успешно активирован"})
+    return Response(serializer.errors, status=400)
+
 
 
 
