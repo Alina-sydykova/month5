@@ -2,16 +2,47 @@ from rest_framework import serializers
 from .models import Category, Product, Review
 
 
-class ReviewSerializer(serializers.ModelSerializer):
+class CategorySerializer(serializers.ModelSerializer):
     class Meta:
-        model = Review
+        model = Category
         fields = '__all__'
+
+    def validate_name(self, value):
+        if len(value.strip()) < 2:
+            raise serializers.ValidationError("Название категории слишком короткое.")
+        return value
 
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = '__all__'
+
+    def validate_title(self, value):
+        if len(value.strip()) < 2:
+            raise serializers.ValidationError("Название продукта слишком короткое.")
+        return value
+
+    def validate_price(self, value):
+        if value < 0:
+            raise serializers.ValidationError("Цена не может быть отрицательной.")
+        return value
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = '__all__'
+
+    def validate_stars(self, value):
+        if not 1 <= value <= 5:
+            raise serializers.ValidationError("Оценка (stars) должна быть от 1 до 5.")
+        return value
+
+    def validate_text(self, value):
+        if len(value.strip()) == 0:
+            raise serializers.ValidationError("Текст отзыва не может быть пустым.")
+        return value
 
 
 class ProductWithReviewsSerializer(serializers.ModelSerializer):
