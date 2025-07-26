@@ -1,26 +1,26 @@
 from django.urls import path
-from . import views
-from . import auth_views 
+from .views import (
+    CategoryListCreateView, CategoryDetailUpdateDeleteView,
+    ProductListCreateView, ProductDetailUpdateDeleteView,
+    ProductWithReviewsView,
+    ReviewListCreateView, ReviewDetailUpdateDeleteView
+)
+from . import auth_views
 
 urlpatterns = [
-    
-    path('categories/', views.category_list_create_view),
-    path('categories/<int:id>/', views.category_detail_update_delete_view),
+    path('categories/', CategoryListCreateView.as_view()),
+    path('categories/<int:id>/', CategoryDetailUpdateDeleteView.as_view()),
 
-   
-    path('products/', views.product_list_create_view),
-    path('products/<int:id>/', views.product_detail_update_delete_view),
-    path('products/reviews/', views.product_with_reviews_view),
+    path('products/', ProductListCreateView.as_view()),
+    path('products/<int:id>/', ProductDetailUpdateDeleteView.as_view()),
+    path('products/reviews/', ProductWithReviewsView.as_view()),
 
-    
-    path('reviews/', views.review_list_create_view),
-    path('reviews/<int:id>/', views.review_detail_update_delete_view),
-
+    path('reviews/', ReviewListCreateView.as_view()),
+    path('reviews/<int:id>/', ReviewDetailUpdateDeleteView.as_view()),
 
     path('register/', auth_views.register_view),
     path('confirm/', auth_views.confirm_view),
 ]
-
 
  
 
