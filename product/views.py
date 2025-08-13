@@ -1,27 +1,29 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics
-from .models import Category, Product, Review
+from rest_framework.authtoken.models import Token
+from .models import Category, Product, Review, User
 from .serializers import (
     ReviewSerializer,
     ProductSerializer,
     ProductWithReviewsSerializer,
     CategoryWithCountSerializer,
     RegisterSerializer,
-    ConfirmSerializer
+    ConfirmSerializer,
+    LoginSerializer
 )
 
 
 
 
+class RegisterView(generics.CreateAPIView):
+    serializer_class = RegisterSerializer
 
-class RegisterView(APIView):
-    def post(self, request):
-        serializer = RegisterSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({"message": "Регистрация прошла успешно. Проверьте код."}, status=201)
-        return Response(serializer.errors, status=400)
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"message": "Регистрация прошла успешно. Проверьте код."}, status=status.HTTP_201_CREATED)
 
 
 class ConfirmView(APIView):
@@ -29,8 +31,17 @@ class ConfirmView(APIView):
         serializer = ConfirmSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response({"message": "Пользователь успешно активирован"})
-        return Response(serializer.errors, status=400)
+            return Response({"message": "Пользователь успешно активирован"}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class LoginView(APIView):
+    def post(self, request):
+        serializer = LoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        token, _ = Token.objects.get_or_create(user=user)
+        return Response({"token": token.key}, status=status.HTTP_200_OK)
 
 
 
@@ -44,6 +55,8 @@ class CategoryDetailUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Category.objects.all()
     serializer_class = CategoryWithCountSerializer
     lookup_field = 'id'
+
+
 
 class ProductListCreateView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
@@ -61,9 +74,6 @@ class ProductWithReviewsView(APIView):
         products = Product.objects.all()
         serializer = ProductWithReviewsSerializer(products, many=True)
         return Response(serializer.data)
-
-
-
 
 
 class ReviewListCreateView(generics.ListCreateAPIView):

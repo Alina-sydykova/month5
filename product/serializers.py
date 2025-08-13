@@ -1,42 +1,58 @@
 from rest_framework import serializers
-from .models import Category, Product, Review
+from .models import Category, Product, Review, User, ConfirmationCode
 
-from django.contrib.auth.models import User
-from .models import ConfirmationCode
+
+
+from django.contrib.auth import authenticate
 
 
 class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, min_length=6)
+
     class Meta:
         model = User
-        fields = ['username', 'email', 'password']
+        fields = ['email', 'password', 'full_name', 'last_name', 'phone_number']
 
     def create(self, validated_data):
-        user = User.objects.create_user(
-            username=validated_data['username'],
-            email=validated_data.get('email'),
-            password=validated_data['password'],
-            is_active=False
-        )
-        ConfirmationCode.objects.create(user=user)  
-        print(f"Confirmation code for {user.username}: {user.confirmationcode.code}")  
+        user = User.objects.create_user(**validated_data)
         return user
+
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        email = data.get('email')
+        password = data.get('password')
+
+        if email and password:
+            user = authenticate(email=email, password=password)
+            if user is None:
+                raise serializers.ValidationError("Неверный email или пароль")
+        else:
+            raise serializers.ValidationError("Должны быть предоставлены email и пароль")
+
+        data['user'] = user
+        return data
+
 
 
 class ConfirmSerializer(serializers.Serializer):
-    username = serializers.CharField()
+    email = serializers.EmailField()
     code = serializers.CharField(max_length=6)
 
     def validate(self, data):
         try:
-            user = User.objects.get(username=data['username'])
+            user = User.objects.get(email=data['email'])
             confirm = ConfirmationCode.objects.get(user=user, code=data['code'])
         except (User.DoesNotExist, ConfirmationCode.DoesNotExist):
-            raise serializers.ValidationError("Неверное имя пользователя или код")
+            raise serializers.ValidationError("Неверный email или код подтверждения")
         return data
 
     def save(self):
-        user = User.objects.get(username=self.validated_data['username'])
+        user = User.objects.get(email=self.validated_data['email'])
         user.is_active = True
+        user.is_verified = True
         user.save()
         ConfirmationCode.objects.filter(user=user).delete()
 
@@ -95,7 +111,7 @@ class ProductWithReviewsSerializer(serializers.ModelSerializer):
 
     def get_average_rating(self, obj):
         reviews = obj.reviews.all()
-        if reviews:
+        if reviews.exists():
             total = sum([review.stars for review in reviews])
             return round(total / len(reviews), 1)
         return None
