@@ -12,7 +12,14 @@ from .serializers import (
     ConfirmSerializer,
     LoginSerializer
 )
-from .permissions import IsModerator  # добавили импорт кастомного permission
+from .permissions import IsModerator  
+from common.validators import validate_age_18
+from django.core.exceptions import ValidationError
+
+
+
+
+
 
 
 class RegisterView(generics.CreateAPIView):
@@ -54,17 +61,49 @@ class CategoryDetailUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = 'id'
 
 
+
+
+
+
+
+
+
+    
+
+
+
+
 class ProductListCreateView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = [IsModerator]  # применяем кастомный permission
 
     def create(self, request, *args, **kwargs):
-        # блокируем POST для модераторов
-        return Response(
-            {"detail": "Создание продуктов запрещено для модераторов."},
-            status=status.HTTP_403_FORBIDDEN
-        )
+        user = request.user
+
+        # Проверяем возраст
+        from django.core.exceptions import ValidationError
+        try:
+            validate_age_18(user.birthday)
+        except ValidationError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_403_FORBIDDEN)
+
+        # Блокируем POST для модераторов
+        if user.is_staff:
+            return Response(
+                {"detail": "Создание продуктов запрещено для модераторов."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # Если все ок, создаем продукт
+        return super().create(request, *args, **kwargs)
+
+
+
+
+
+
+
 
 
 class ProductDetailUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):

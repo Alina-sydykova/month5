@@ -24,3 +24,14 @@ urlpatterns = [
 
  
 
+
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .tokens import MyTokenObtainPairSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
+
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
+
+urlpatterns = [
+    path('api/token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
+]

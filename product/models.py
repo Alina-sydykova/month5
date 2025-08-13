@@ -27,12 +27,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(max_length=30, blank=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+    birthday = models.DateField(null=True, blank=True)
 
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []  # если нет других обязательных полей
-
+    REQUIRED_FIELDS = [] 
     def __str__(self):
         return self.email
 
