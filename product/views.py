@@ -12,8 +12,7 @@ from .serializers import (
     ConfirmSerializer,
     LoginSerializer
 )
-
-
+from .permissions import IsModerator  # добавили импорт кастомного permission
 
 
 class RegisterView(generics.CreateAPIView):
@@ -44,8 +43,6 @@ class LoginView(APIView):
         return Response({"token": token.key}, status=status.HTTP_200_OK)
 
 
-
-
 class CategoryListCreateView(generics.ListCreateAPIView):
     queryset = Category.objects.all()
     serializer_class = CategoryWithCountSerializer
@@ -57,16 +54,24 @@ class CategoryDetailUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = 'id'
 
 
-
 class ProductListCreateView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    permission_classes = [IsModerator]  # применяем кастомный permission
+
+    def create(self, request, *args, **kwargs):
+        # блокируем POST для модераторов
+        return Response(
+            {"detail": "Создание продуктов запрещено для модераторов."},
+            status=status.HTTP_403_FORBIDDEN
+        )
 
 
 class ProductDetailUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     lookup_field = 'id'
+    permission_classes = [IsModerator]  # разрешаем модератору редактировать и удалять
 
 
 class ProductWithReviewsView(APIView):
