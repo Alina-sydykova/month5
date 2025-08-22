@@ -1,11 +1,12 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, ConfirmationCode, Category, Product, Review
+from users.models import User, ConfirmationCode
+from .models import Category, Product, Review
 from .forms import UserCreationForm, UserChangeForm
 
 class UserAdmin(BaseUserAdmin):
-    form = UserChangeForm       # форма для редактирования
-    add_form = UserCreationForm # форма для создания
+    form = UserChangeForm      
+    add_form = UserCreationForm 
 
     list_display = ('email', 'is_staff', 'is_active', 'is_superuser')
     list_filter = ('is_staff', 'is_superuser', 'is_active')

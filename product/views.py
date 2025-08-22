@@ -2,24 +2,17 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics
 from rest_framework.authtoken.models import Token
-from .models import Category, Product, Review, User
+from .models import Category, Product, Review
 from .serializers import (
     ReviewSerializer,
     ProductSerializer,
     ProductWithReviewsSerializer,
     CategoryWithCountSerializer,
-    RegisterSerializer,
-    ConfirmSerializer,
-    LoginSerializer
 )
-from .permissions import IsModerator  
-from common.validators import validate_age_18
+from users.serializers import RegisterSerializer, ConfirmSerializer, LoginSerializer
+from common.permissions import IsModerator
+#from common.validators import validate_age_18
 from django.core.exceptions import ValidationError
-
-
-
-
-
 
 
 class RegisterView(generics.CreateAPIView):
@@ -61,57 +54,22 @@ class CategoryDetailUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = 'id'
 
 
-
-
-
-
-
-
-
-    
-
-
-
-
 class ProductListCreateView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    permission_classes = [IsModerator]  # применяем кастомный permission
 
-    def create(self, request, *args, **kwargs):
-        user = request.user
-
-        # Проверяем возраст
-        from django.core.exceptions import ValidationError
-        try:
-            validate_age_18(user.birthday)
-        except ValidationError as e:
-            return Response({"detail": str(e)}, status=status.HTTP_403_FORBIDDEN)
-
-        # Блокируем POST для модераторов
-        if user.is_staff:
-            return Response(
-                {"detail": "Создание продуктов запрещено для модераторов."},
-                status=status.HTTP_403_FORBIDDEN
-            )
-
-        # Если все ок, создаем продукт
-        return super().create(request, *args, **kwargs)
-
-
-
-
-
-
-
+    def get_permissions(self):
+        from rest_framework.permissions import IsAuthenticated
+        if self.request.method == "POST":
+                     return [IsAuthenticated()]
+        return []
 
 
 class ProductDetailUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     lookup_field = 'id'
-    permission_classes = [IsModerator]  # разрешаем модератору редактировать и удалять
-
+    permission_classes = [IsModerator] 
 
 class ProductWithReviewsView(APIView):
     def get(self, request):

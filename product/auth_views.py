@@ -4,7 +4,9 @@ from rest_framework.response import Response
 from django.contrib.auth.models import User
 from rest_framework import status
 import random
-from .models import ConfirmationCode
+
+from users.models import ConfirmationCode
+
 
 @api_view(['POST'])
 def register_view(request):
