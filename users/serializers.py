@@ -1,3 +1,4 @@
+
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from .models import User, ConfirmationCode
@@ -8,11 +9,18 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['email', 'password', 'first_name', 'last_name', 'birthday'] 
+        fields = ['email', 'password', 'first_name', 'last_name', 'birthday']
 
     def create(self, validated_data):
+        
         user = User.objects.create_user(**validated_data)
+        
+        user.is_active = False
+        user.save()
+        ConfirmationCode.objects.update_or_create(user=user, defaults={})
         return user
+    
+    
 
 
 class LoginSerializer(serializers.Serializer):
@@ -50,4 +58,5 @@ class ConfirmSerializer(serializers.Serializer):
         user = User.objects.get(email=self.validated_data['email'])
         user.is_active = True
         user.save()
+      
         ConfirmationCode.objects.filter(user=user).delete()

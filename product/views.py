@@ -11,7 +11,9 @@ from .serializers import (
 )
 from users.serializers import RegisterSerializer, ConfirmSerializer, LoginSerializer
 from common.permissions import IsModerator
-#from common.validators import validate_age_18
+from common.validators import validate_age_18
+from users.serializers import RegisterSerializer, ConfirmSerializer, LoginSerializer
+
 from django.core.exceptions import ValidationError
 
 
@@ -61,8 +63,23 @@ class ProductListCreateView(generics.ListCreateAPIView):
     def get_permissions(self):
         from rest_framework.permissions import IsAuthenticated
         if self.request.method == "POST":
-                     return [IsAuthenticated()]
+            return [IsAuthenticated()]
         return []
+
+    def create(self, request, *args, **kwargs):
+        
+        payload = getattr(request, "auth", {}) or {}
+        birthday = payload.get("birthday") if hasattr(payload, "get") else None
+
+        try:
+            validate_age_18(birthday)
+        except ValidationError as e:
+            
+            return Response({"detail": "Вам должно быть 18 лет, чтобы создать продукт."},
+                            status=status.HTTP_403_FORBIDDEN)
+
+        return super().create(request, *args, **kwargs)
+
 
 
 class ProductDetailUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):

@@ -1,37 +1,30 @@
+
 from django.urls import path
 from .views import (
     CategoryListCreateView, CategoryDetailUpdateDeleteView,
     ProductListCreateView, ProductDetailUpdateDeleteView,
     ProductWithReviewsView,
-    ReviewListCreateView, ReviewDetailUpdateDeleteView
+    ReviewListCreateView, ReviewDetailUpdateDeleteView,
+    RegisterView, ConfirmView, LoginView,
 )
-from . import auth_views
 
 urlpatterns = [
-    path('categories/', CategoryListCreateView.as_view()),
-    path('categories/<int:id>/', CategoryDetailUpdateDeleteView.as_view()),
+    
+    path('register/', RegisterView.as_view(), name='register'),
+    path('confirm/', ConfirmView.as_view(), name='confirm'),
+    path('login/', LoginView.as_view(), name='login'),  
 
-    path('products/', ProductListCreateView.as_view()),
-    path('products/<int:id>/', ProductDetailUpdateDeleteView.as_view()),
-    path('products/reviews/', ProductWithReviewsView.as_view()),
+    path('categories/', CategoryListCreateView.as_view(), name='categories'),
+    path('categories/<int:id>/', CategoryDetailUpdateDeleteView.as_view(), name='category_detail'),
 
-    path('reviews/', ReviewListCreateView.as_view()),
-    path('reviews/<int:id>/', ReviewDetailUpdateDeleteView.as_view()),
+    
+    path('products/', ProductListCreateView.as_view(), name='products'),
+    path('products/<int:id>/', ProductDetailUpdateDeleteView.as_view(), name='product_detail'),
+    path('products/reviews/', ProductWithReviewsView.as_view(), name='products_with_reviews'),
 
-    path('register/', auth_views.register_view),
-    path('confirm/', auth_views.confirm_view),
+    
+    path('reviews/', ReviewListCreateView.as_view(), name='reviews'),
+    path('reviews/<int:id>/', ReviewDetailUpdateDeleteView.as_view(), name='review_detail'),
 ]
 
- 
 
-
-from rest_framework_simplejwt.views import TokenObtainPairView
-from .tokens import MyTokenObtainPairSerializer
-from rest_framework_simplejwt.views import TokenObtainPairView
-
-class MyTokenObtainPairView(TokenObtainPairView):
-    serializer_class = MyTokenObtainPairSerializer
-
-urlpatterns = [
-    path('api/token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
-]
