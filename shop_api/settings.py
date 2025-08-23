@@ -162,3 +162,37 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 AUTH_USER_MODEL = 'users.User'
+
+
+
+# -------- Celery ----------
+CELERY_BROKER_URL = "redis://127.0.0.1:6379/1"      
+CELERY_RESULT_BACKEND = "redis://127.0.0.1:6379/2"  
+CELERY_TIMEZONE = "Asia/Bishkek"
+CELERY_ENABLE_UTC = True
+
+from celery.schedules import crontab
+CELERY_BEAT_SCHEDULE = {
+    "send-admin-daily-stats": {
+        "task": "users.tasks.send_daily_admin_stats",
+        "schedule": crontab(hour=9, minute=0),  
+        
+    },
+}
+
+# -------- Email (SMTP) ----------
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
+EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True") == "True"
+
+EMAIL_HOST_USER = os.getenv("sydykovaalina712@gmail.com")
+EMAIL_HOST_PASSWORD = os.getenv("mhdblktblwesvdjv")
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", EMAIL_HOST_USER)
+
+
+
+
