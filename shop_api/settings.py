@@ -21,6 +21,12 @@ load_dotenv(BASE_DIR / '.env')
 
 
 
+REDIS_HOST = "127.0.0.1"
+REDIS_PORT = 6379
+REDIS_DB = 0
+
+
+
 SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG') == 'True'
 
